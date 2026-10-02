@@ -9,5 +9,6 @@ export interface IQRs {
 
 export interface ClientIQRS extends Omit<IQRs, 'createdAt'> {
   createdAt: string
+  shortUrl: string
   svg: string
 }

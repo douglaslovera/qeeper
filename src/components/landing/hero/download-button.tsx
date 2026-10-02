@@ -1,3 +1,4 @@
+import { useTranslations } from '@/i18n/provider'
 import { Button } from '@/components/ui/button'
 import { downloadPng } from '@/utils/download-image'
 import type React from 'react'
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export function DownloadButton({ svg, disabled, size, className, icon }: Props) {
+  const t = useTranslations()
   const handleSave = () => {
     if (!svg) return
     downloadPng('qr-code', svg, { scale: 5 })
@@ -24,7 +26,7 @@ export function DownloadButton({ svg, disabled, size, className, icon }: Props) 
       className={className}
     >
       {icon}
-      <span className="flex w-full justify-center text-center">Download</span>
+      <span className="flex w-full justify-center text-center">{t('download')}</span>
     </Button>
   )
 }

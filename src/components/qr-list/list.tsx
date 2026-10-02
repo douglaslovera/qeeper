@@ -9,7 +9,7 @@ type Props = {
 
 export function List({ list }: Props) {
   return (
-    <section className="flex flex-col gap-4 mt-10">
+    <section className="mt-16 flex flex-col gap-10 pr-3">
       {list?.map((item) => (
         <Item key={item.alias} {...item} />
       ))}

@@ -1,3 +1,4 @@
+import { useTranslations } from '@/i18n/provider'
 import type { FetchStatus } from '@/types/types'
 import { useState } from 'react'
 
@@ -5,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { DestinationUrlField } from './destination-url-field'
 import { Button } from '@/components/ui/button'
+import { Delete } from '@/components/icons/delete'
 import {
   deleteDynamicQR,
   disableDynamicQR,
@@ -20,6 +22,7 @@ export const EditForm = ({
   destinationUrl: string
   disabled: boolean
 }) => {
+  const t = useTranslations()
   const fieldNames = {
     disabled: 'disabled',
     disableViews: 'disableViews',
@@ -35,7 +38,7 @@ export const EditForm = ({
 
     // use a modal here
     const userResponse = confirm(
-      `Are you sure you want to ${value ? 'disable' : 'enable'} this QR?`,
+      t(value ? 'confirmDisable' : 'confirmEnable'),
     )
     if (!userResponse) return
 
@@ -60,7 +63,7 @@ export const EditForm = ({
 
   const handleDelete = async () => {
     // use a modal here
-    const userResponse = confirm('Are you sure you want to delete this QR?')
+    const userResponse = confirm(t('confirmDelete'))
     if (!userResponse) return
 
     setStatus({ ...status, delete: 'FETCHING' })
@@ -78,19 +81,20 @@ export const EditForm = ({
   return (
     <section className="flex flex-col gap-6 mb-2">
       <div className="hidden justify-between gap-20">
-        <Input placeholder="Background Color" disabled />
-        <Input placeholder="Squares Color" disabled />
+        <Input placeholder={t('backgroundColor')} disabled />
+        <Input placeholder={t('squaresColor')} disabled />
       </div>
 
       <div className="w-full">
         <DestinationUrlField id={id} destinationUrl={destinationUrl} />
       </div>
 
-      <div className="justify-between items-center gap-20">
+      <div className="justify-between items-center gap-20 border-2 border-dashed border-black px-4 py-3">
         <Switch
           name={fieldNames.disabled}
-          label="Disable Link"
-          description="If this option is enabled, the QR will show a 404 page"
+          label={t('disableLink')}
+          aria-label={t('disableLink')}
+          description={t('disableHelp')}
           checked={disabled}
           disabled={status.disabled === 'FETCHING'}
           onChange={handleUpdateSwitch}
@@ -98,20 +102,23 @@ export const EditForm = ({
         <div className="hidden">
           <Switch
             name={fieldNames.disableViews}
-            label="Visitors Count"
-            description="Keep track of the amount of people that visits your QR"
+            label={t('visitorsCount')}
+            aria-label={t('visitorsCount')}
+            description={t('visitorsHelp')}
             disabled
           />
         </div>
       </div>
 
-      <div className="flex justify-start gap-4 mt-8">
+      <div className="flex justify-start gap-4 mt-2">
         <Button
-          className="flex justify-center text-center w-1/4"
+          className="h-12 w-full rounded-none border-4 px-6 text-base font-black uppercase shadow-[6px_6px_0_#000] sm:w-auto"
           variant="destructive"
           onClick={handleDelete}
+          disabled={status.delete === 'FETCHING'}
         >
-          Delete
+          <Delete className="size-6" color="currentColor" />
+          {t('delete')}
         </Button>
       </div>
     </section>

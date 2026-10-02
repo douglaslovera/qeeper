@@ -36,3 +36,26 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+
+## App language
+
+QeepeR defaults to English and automatically uses Spanish when the browser's
+preferred language is Spanish, including all `es-*` dialects such as `es-PE`,
+`es-MX`, and `es-ES`. The server uses `Accept-Language` for the initial render;
+the browser then checks its preferred language. The document language and page
+description follow the selected language too.
+
+To force Spanish, paste this into the browser's developer console:
+
+```js
+document.cookie = 'qeeper-locale=es; path=/; max-age=31536000; SameSite=Lax';
+location.reload();
+```
+
+Use `qeeper-locale=en` in the same command to force English. The override persists
+for one year in that browser. To restore automatic detection:
+
+```js
+document.cookie = 'qeeper-locale=; path=/; max-age=0; SameSite=Lax';
+location.reload();
+```

@@ -1,5 +1,7 @@
 'use client'
 
+import { useTranslations } from '@/i18n/provider'
+
 import { useState } from 'react'
 
 import { QrImage } from '@/components/shared/qr-image'
@@ -23,6 +25,7 @@ export function Generate({
   defaultDynamicSwitch,
   hideable = false,
 }: Props) {
+  const t = useTranslations()
   const [svg, setSvg] = useState<string | null>(null)
 
   const { atLeastSm } = useScreen()
@@ -38,13 +41,13 @@ export function Generate({
         shadow={false}
         weight="normal"
         className="relative rounded-none bg-white p-0 shadow-[16px_16px_0_#000]"
-        componentProps={(canBeHidden && { defaultOpen: false }) || {}}
+        componentProps={(canBeHidden && { defaultOpen: false, title: t('generateQr') }) || {}}
       >
         <div className="px-5 py-6 sm:px-9 sm:py-7 lg:px-12">
           <div className="grid min-h-72 w-full grid-cols-1 items-start gap-7 lg:grid-cols-[1fr_1px_32%] lg:gap-8">
             <div className="max-w-[34rem]">
               <h2 className="mb-2 text-4xl font-black uppercase leading-none sm:text-[2.5rem]">
-                Generate a QR
+                {t('generateQr')}
               </h2>
               <div className="mb-6 h-1 w-full bg-black" />
               <QrGenerationForm
@@ -56,7 +59,7 @@ export function Generate({
             <div className="hidden bg-black lg:block" />
             <div className="flex h-full flex-col justify-between gap-4">
               <div className="flex items-center justify-between gap-3">
-                <h3 className="text-base font-black uppercase">QR Preview</h3>
+                <h3 className="text-base font-black uppercase">{t('qrPreview')}</h3>
               </div>
               <div className="overflow-hidden border-4 border-black">
                 <QrImage
@@ -64,7 +67,7 @@ export function Generate({
                   className="rounded-none border-0 p-0"
                 />
                 <p className="bg-black px-3 py-2 text-center text-sm font-black text-white sm:text-base">
-                  Your QR code will appear here
+                  {t('qrPlaceholder')}
                 </p>
               </div>
 

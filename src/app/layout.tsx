@@ -2,28 +2,37 @@ import type { Metadata } from 'next'
 import localFont from 'next/font/local'
 import './globals.css'
 import { Header } from '@/components/landing/header'
+import { LocaleProvider } from '@/i18n/provider'
+import { getLocale } from '@/i18n/server'
+import { messages } from '@/i18n/messages'
 
 const satoshiFont = localFont({
   src: './fonts/Satoshi.woff2',
   display: 'swap',
 })
 
-export const metadata: Metadata = {
-  title: 'QeepeR - QR Code Keeper',
-  description:
-    'QeepeR is a QR code keeper. It allows you to create, edit, and share QR codes.',
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale()
+  return {
+    title: 'QeepeR - QR Code Keeper',
+    description: messages[locale].description,
+  }
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const locale = await getLocale()
+
   return (
-    <html lang="en" className={satoshiFont.className}>
+    <html lang={locale} className={satoshiFont.className}>
       <body className="text-black">
-        <Header />
-        {children}
+        <LocaleProvider initialLocale={locale}>
+          <Header />
+          {children}
+        </LocaleProvider>
       </body>
     </html>
   )

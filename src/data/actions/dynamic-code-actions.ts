@@ -81,11 +81,15 @@ export async function listDynamicQRs() {
       return []
     }
 
-    const mapped = response.map(async (item) => ({
-      ...item,
-      createdAt: transformTimestamp(item?.createdAt),
-      svg: await generateQr(getWorkerUrl(item.alias)),
-    }))
+    const mapped = response.map(async (item) => {
+      const shortUrl = getWorkerUrl(item.alias)
+      return {
+        ...item,
+        createdAt: transformTimestamp(item?.createdAt),
+        shortUrl,
+        svg: await generateQr(shortUrl),
+      }
+    })
 
     const result = await Promise.all(mapped)
 

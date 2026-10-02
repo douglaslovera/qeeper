@@ -4,18 +4,29 @@ interface AccordionProps {
   children: React.ReactNode
   title: string
   defaultOpen?: boolean
+  /** Replaces the default container classes */
+  containerClassName?: string
+  /** Replaces the default title classes */
+  titleClassName?: string
 }
 
 export function Accordion({
   children,
   title,
   defaultOpen = false,
+  containerClassName,
+  titleClassName,
 }: AccordionProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen)
   const toggle = () => setIsOpen(!isOpen)
 
   return (
-    <div className="rounded-base border-base bg-white border-base-400 text-md font-base shadow-dark">
+    <div
+      className={
+        containerClassName ??
+        'rounded-base border-base bg-white border-base-400 text-md font-base shadow-dark'
+      }
+    >
       <div
         className="flex justify-between items-center w-full cursor-pointer p-4"
         onClick={toggle}
@@ -25,7 +36,7 @@ export function Accordion({
         role="button"
         aria-expanded={isOpen}
       >
-        <p className="font-bold text-lg">{title}</p>
+        <p className={titleClassName ?? 'font-bold text-lg'}>{title}</p>
         <span
           className={`text-black text-xl transition-transform duration-200 ${
             isOpen ? 'rotate-180' : ''

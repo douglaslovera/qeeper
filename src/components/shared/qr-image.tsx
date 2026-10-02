@@ -1,3 +1,4 @@
+import { useTranslations } from '@/i18n/provider'
 import { Card } from '../ui/card'
 
 interface Props {
@@ -5,6 +6,7 @@ interface Props {
   className?: string
 }
 export const QrImage = ({ svg, className }: Props) => {
+  const t = useTranslations()
   return (
     <Card shadow={false} className={className}>
       {svg ? (
@@ -17,7 +19,7 @@ export const QrImage = ({ svg, className }: Props) => {
       ) : (
         <div
           data-qr-preview
-          aria-label="Sample QR preview"
+          aria-label={t('samplePreview')}
           className="aspect-square h-full w-full bg-white p-4"
         >
           <div className="grid h-full w-full grid-cols-11 grid-rows-11 gap-1">

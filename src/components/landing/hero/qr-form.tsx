@@ -1,3 +1,4 @@
+import { useTranslations } from '@/i18n/provider'
 import { useState } from 'react'
 import { API_BASE_URL } from '@/constants/app'
 /* actions */
@@ -8,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { LightningBolt } from '@/components/icons/lightning-bolt'
 import { Qr } from '@/components/icons/qr'
+import { Link } from '@/components/icons/link'
 import { generateQr } from '@/utils/generate-qr'
 
 interface Props {
@@ -21,6 +23,7 @@ export function QrGenerationForm({
   isUserLogged,
   defaultDynamicSwitch,
 }: Props) {
+  const t = useTranslations()
   const isDynamicQrDisabled = !isUserLogged
 
   const handleSubmit = async (evt: React.FormEvent<HTMLFormElement>) => {
@@ -51,27 +54,18 @@ export function QrGenerationForm({
       <div className="flex flex-col gap-3.5">
         <label className="flex flex-col gap-2" htmlFor="landing-url">
           <span className="text-sm font-black uppercase sm:text-base">
-            Destination URL
+            {t('destinationUrl')}
           </span>
           <span className="relative">
             <Input
               id="landing-url"
               name="url"
-              placeholder="https://your-website.com"
+              placeholder={t('urlPlaceholder')}
               required
               className="h-14 rounded-none border-4 px-5 pl-14 text-base font-bold shadow-none placeholder:text-black/35"
             />
             <span className="pointer-events-none absolute left-5 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center text-black">
-              <svg viewBox="0 0 24 24" className="size-6" aria-hidden="true">
-                <path
-                  d="M10.5 13.5 13.5 10.5M8.5 12.5 6.9 14.1a3.6 3.6 0 1 0 5.1 5.1l2.2-2.2a3.6 3.6 0 0 0 0-5.1M15.5 11.5l1.6-1.6A3.6 3.6 0 1 0 12 4.8L9.8 7a3.6 3.6 0 0 0 0 5.1"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2.5"
-                />
-              </svg>
+              <Link className="size-6" />
             </span>
           </span>
         </label>
@@ -80,15 +74,16 @@ export function QrGenerationForm({
           <span className="flex size-6 shrink-0 items-center justify-center rounded-full border-2 border-black font-black">
             i
           </span>
-          <span>Enter the URL or link you want your QR code to open.</span>
+          <span>{t('urlHelp')}</span>
         </div>
 
-        <div title={isDynamicQrDisabled ? 'You need to login' : undefined}>
+        <div title={isDynamicQrDisabled ? t('loginRequired') : undefined}>
           <p className="mb-2 text-sm font-black uppercase sm:text-base">
-            Dynamic QR
+            {t('dynamicQr')}
           </p>
           <Switch
-            label="DynamicQR"
+            label={t('dynamicQr')}
+            aria-label={t('dynamicQr')}
             disabled={isDynamicQrDisabled}
             name="is_dynamic"
             checked={defaultDynamicSwitch}
@@ -100,8 +95,7 @@ export function QrGenerationForm({
             <LightningBolt className="size-5" />
           </span>
           <p className="text-xs font-bold leading-5 sm:text-sm">
-            Dynamic QR lets you update the destination link anytime without
-            reprinting.
+            {t('dynamicHelp')}
           </p>
         </div>
       </div>
@@ -112,7 +106,7 @@ export function QrGenerationForm({
           className="h-14 w-full rounded-none border-4 text-2xl font-black uppercase shadow-[8px_8px_0_#000]"
         >
           <Qr className="size-8" />
-          <span className="flex flex-1 justify-center px-3">Generate</span>
+          <span className="flex flex-1 justify-center px-3">{t('generate')}</span>
           <svg
             viewBox="0 0 24 24"
             className="size-8"

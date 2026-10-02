@@ -1,5 +1,7 @@
 'use server'
 
+import { Text } from '@/i18n/provider'
+
 import { redirect } from 'next/navigation'
 import { getUserMe } from '@/data/services/get-user-me-service'
 import { listDynamicQRs } from '@/data/actions/dynamic-code-actions'
@@ -17,14 +19,14 @@ export default async function Page() {
   const list = await listDynamicQRs()
 
   if (!list) {
-    return <div>Improve this</div>
+    return <div><Text id="listError" /></div>
   }
 
   return (
     <main className="min-w-80 w-full bg-[#b0f0da] px-4 pb-10">
       <div className="w-full max-w-4xl mx-auto">
         <h1 className="text-4xl font-semibold text-center py-10">
-          Your QR List
+          <Text id="qrList" />
         </h1>
         <Generate isUserLogged={!!user?.uid} defaultDynamicSwitch hideable />
         <List list={list} />
