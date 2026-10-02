@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import localFont from 'next/font/local'
 import './globals.css'
 import { Header } from '@/components/landing/header'
@@ -10,6 +10,10 @@ const satoshiFont = localFont({
   src: './fonts/Satoshi.woff2',
   display: 'swap',
 })
+
+export const viewport: Viewport = {
+  themeColor: '#ffffff',
+}
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale()

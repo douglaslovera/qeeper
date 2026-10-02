@@ -52,6 +52,11 @@
 }
   
 @layer base {
+  html {
+    /* Match the header in the browser chrome and overscroll area. */
+    background-color: #fff;
+  }
+
   body {
     @apply bg-background text-foreground font-base;
   }
