@@ -7,7 +7,6 @@ import { createDynamicQR } from '@/data/actions/dynamic-code-actions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
-import { LightningBolt } from '@/components/icons/lightning-bolt'
 import { Qr } from '@/components/icons/qr'
 import { Link } from '@/components/icons/link'
 import { generateQr } from '@/utils/generate-qr'
@@ -15,13 +14,15 @@ import { generateQr } from '@/utils/generate-qr'
 interface Props {
   setSvg: (svg: string | null) => void
   isUserLogged: boolean
-  defaultDynamicSwitch?: boolean
+  isDynamic: boolean
+  setIsDynamic: (isDynamic: boolean) => void
 }
 
 export function QrGenerationForm({
   setSvg,
   isUserLogged,
-  defaultDynamicSwitch,
+  isDynamic,
+  setIsDynamic,
 }: Props) {
   const t = useTranslations()
   const isDynamicQrDisabled = !isUserLogged
@@ -30,7 +31,6 @@ export function QrGenerationForm({
     evt.preventDefault()
     const form = evt.currentTarget
     const { value } = form.url
-    const { checked: isDynamic } = form.is_dynamic
 
     if (!value) return
     // TODO: Check the value is a valid URL
@@ -81,22 +81,21 @@ export function QrGenerationForm({
           <p className="mb-2 text-sm font-black uppercase sm:text-base">
             {t('dynamicQr')}
           </p>
-          <Switch
-            label={t('dynamicQr')}
-            aria-label={t('dynamicQr')}
-            disabled={isDynamicQrDisabled}
-            name="is_dynamic"
-            checked={defaultDynamicSwitch}
-          />
-        </div>
-
-        <div className="flex items-center gap-3 border-2 border-dashed border-black px-4 py-2">
-          <span className="flex size-9 shrink-0 items-center justify-center bg-main">
-            <LightningBolt className="size-5" />
-          </span>
-          <p className="text-xs font-bold leading-5 sm:text-sm">
-            {t('dynamicHelp')}
-          </p>
+          <div className="flex items-start gap-3">
+            <Switch
+              id="landing-is-dynamic"
+              disabled={isDynamicQrDisabled}
+              name="is_dynamic"
+              checked={isDynamic}
+              onCheckedChange={setIsDynamic}
+            />
+            <label
+              htmlFor="landing-is-dynamic"
+              className="text-xs font-bold leading-5 sm:text-sm"
+            >
+              {t('dynamicHelp')}
+            </label>
+          </div>
         </div>
       </div>
       <div>

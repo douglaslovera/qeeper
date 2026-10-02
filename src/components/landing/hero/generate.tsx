@@ -9,10 +9,13 @@ import { QrImage } from '@/components/shared/qr-image'
 import { QrGenerationForm } from './qr-form'
 import { Card } from '@/components/ui/card'
 import { DownloadButton } from './download-button'
+import { RollingLinks } from './rolling-links'
 import { Button } from '@/components/ui/button'
 import { Accordion } from '@/components/shared/accordion'
 import { useScreen } from '@/hook/use-screen'
 import { Download } from '@/components/icons/download'
+import { LightningBolt } from '@/components/icons/lightning-bolt'
+import { cn } from '@/lib'
 
 interface Props {
   isUserLogged: boolean
@@ -26,7 +29,16 @@ export function Generate({
   hideable = false,
 }: Props) {
   const t = useTranslations()
-  const [svg, setSvg] = useState<string | null>(null)
+  const [isDynamic, setIsDynamic] = useState(Boolean(defaultDynamicSwitch))
+  // Each mode keeps its own QR so switching never shows a QR of the other kind
+  const [svgs, setSvgs] = useState<Record<'static' | 'dynamic', string | null>>({
+    static: null,
+    dynamic: null,
+  })
+  const mode = isDynamic ? 'dynamic' : 'static'
+  const svg = svgs[mode]
+  const setSvg = (value: string | null) =>
+    setSvgs((prev) => ({ ...prev, [mode]: value }))
 
   const { atLeastSm } = useScreen()
 
@@ -53,7 +65,8 @@ export function Generate({
               <QrGenerationForm
                 setSvg={setSvg}
                 isUserLogged={isUserLogged}
-                defaultDynamicSwitch={defaultDynamicSwitch}
+                isDynamic={isDynamic}
+                setIsDynamic={setIsDynamic}
               />
             </div>
             <div className="hidden bg-black lg:block" />
@@ -61,14 +74,35 @@ export function Generate({
               <div className="flex items-center justify-between gap-3">
                 <h3 className="text-base font-black uppercase">{t('qrPreview')}</h3>
               </div>
-              <div className="overflow-hidden border-4 border-black">
-                <QrImage
-                  svg={svg || ''}
-                  className="rounded-none border-0 p-0"
-                />
-                <p className="bg-black px-3 py-2 text-center text-sm font-black text-white sm:text-base">
-                  {t('qrPlaceholder')}
-                </p>
+              <div className="relative">
+                <div className="overflow-hidden border-4 border-black">
+                  <QrImage
+                    svg={svg || ''}
+                    className="rounded-none border-0 p-0"
+                  />
+                  <p
+                    className={cn(
+                      'px-3 py-2 text-center text-sm font-black transition-colors duration-300 sm:text-base',
+                      isDynamic ? 'bg-main text-black' : 'bg-black text-white',
+                    )}
+                  >
+                    {isDynamic ? (
+                      <RollingLinks className="h-5 sm:h-6" />
+                    ) : (
+                      t('qrPlaceholder')
+                    )}
+                  </p>
+                </div>
+                <div
+                  aria-hidden={!isDynamic}
+                  className={cn(
+                    'absolute -right-4 -top-4 flex rotate-6 items-center gap-1.5 border-4 border-black bg-main px-3 py-1 text-sm font-black uppercase shadow-[4px_4px_0_#000] transition-[opacity,transform] duration-300',
+                    isDynamic ? 'scale-100 opacity-100' : 'pointer-events-none scale-75 opacity-0',
+                  )}
+                >
+                  <LightningBolt className="size-4" />
+                  {t('dynamicQr')}
+                </div>
               </div>
 
               <DownloadButton

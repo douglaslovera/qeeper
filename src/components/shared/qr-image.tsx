@@ -1,5 +1,20 @@
 import { useTranslations } from '@/i18n/provider'
+import qr from 'qrcode'
 import { Card } from '../ui/card'
+
+// Real QR matrix so the placeholder reads as a QR; finder patterns are drawn
+// solid and data modules faded to make it clear it's only a sample
+const sample = qr.create('qeeper', { errorCorrectionLevel: 'L' }).modules
+const SAMPLE_SIZE = sample.size
+const SAMPLE_MODULES = Array.from({ length: SAMPLE_SIZE ** 2 }, (_, cell) => {
+  const row = Math.floor(cell / SAMPLE_SIZE)
+  const col = cell % SAMPLE_SIZE
+  const near = (n: number) => n < 7
+  const far = (n: number) => n >= SAMPLE_SIZE - 7
+  const finder =
+    (near(row) && near(col)) || (near(row) && far(col)) || (far(row) && near(col))
+  return { row, col, finder, filled: sample.get(row, col) }
+}).filter(({ filled }) => filled)
 
 interface Props {
   svg: string
@@ -22,31 +37,23 @@ export const QrImage = ({ svg, className }: Props) => {
           aria-label={t('samplePreview')}
           className="aspect-square h-full w-full bg-white p-4"
         >
-          <div className="grid h-full w-full grid-cols-11 grid-rows-11 gap-1">
-            {Array.from({ length: 121 }, (_, cell) => {
-              const row = Math.floor(cell / 11)
-              const col = cell % 11
-              const finder =
-                (row < 4 && col < 4) ||
-                (row < 4 && col > 6) ||
-                (row > 6 && col < 4)
-              const innerFinder =
-                (row === 1 || row === 2 || row === 8 || row === 9) &&
-                (col === 1 || col === 2 || col === 8 || col === 9)
-              const modules = new Set([
-                5, 17, 25, 38, 41, 45, 50, 52, 57, 61, 63, 67, 69, 73, 78,
-                82, 86, 91, 95, 101, 104, 109, 113, 118,
-              ])
-              const filled = finder || innerFinder || modules.has(cell)
-
-              return (
-                <span
-                  key={`qr-cell-${row}-${col}`}
-                  className={filled ? 'bg-black' : 'bg-transparent'}
-                />
-              )
-            })}
-          </div>
+          <svg
+            viewBox={`0 0 ${SAMPLE_SIZE} ${SAMPLE_SIZE}`}
+            className="h-full w-full"
+            shapeRendering="crispEdges"
+            aria-hidden="true"
+          >
+            {SAMPLE_MODULES.map(({ row, col, finder }) => (
+              <rect
+                key={`${row}-${col}`}
+                x={col}
+                y={row}
+                width={1}
+                height={1}
+                className={finder ? 'fill-black' : 'fill-black/20'}
+              />
+            ))}
+          </svg>
         </div>
       )}
     </Card>
