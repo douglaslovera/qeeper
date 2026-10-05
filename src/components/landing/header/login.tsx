@@ -2,6 +2,7 @@
 
 import { useTranslations } from '@/i18n/provider'
 
+import { LogOut } from '@/components/icons/log-out'
 import { Button } from '@/components/ui/button'
 import { logInWithGoogle, logOut } from '@/data/services/auth-service'
 
@@ -30,7 +31,7 @@ export function LoginHeader({ name }: Props) {
       <div className="flex items-center gap-2">
         <p>{name.split(' ')[0]}</p>
         <Button aria-label={t('logout')} title={t('logout')} onClick={handleLogOut} color="light" size="small">
-          ↪
+          <LogOut className="size-5" />
         </Button>
       </div>
     )

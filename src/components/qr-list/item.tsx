@@ -1,13 +1,13 @@
-import { useTranslations } from '@/i18n/provider'
 import type { ClientIQRS } from '@/data/models/IQRs'
+import { useTranslations } from '@/i18n/provider'
 import { cn } from '@/lib'
-import { QrImage } from '../shared/qr-image'
-import { Accordion } from '../shared/accordion'
-import { EditForm } from './form/edit-form'
-import { DownloadButton } from '../landing/hero/download-button'
 import { Download } from '../icons/download'
 import { Eye } from '../icons/eye'
-import { Link } from '../icons/link'
+import { DownloadButton } from '../landing/hero/download-button'
+import { Accordion } from '../shared/accordion'
+import { QrImage } from '../shared/qr-image'
+import { DestinationUrlField } from './form/destination-url-field'
+import { EditForm } from './form/edit-form'
 
 type Props = ClientIQRS
 
@@ -62,15 +62,7 @@ export function Item({
               <p className="mb-2 text-sm font-black uppercase sm:text-base">
                 {t('destinationUrl')}
               </p>
-              <a
-                href={destinationUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="flex h-14 items-center gap-3 border-4 border-black px-5 font-bold transition-colors hover:bg-main/20"
-              >
-                <Link className="size-6 shrink-0" />
-                <span className="truncate">{destinationUrl}</span>
-              </a>
+              <DestinationUrlField id={alias} destinationUrl={destinationUrl} />
             </div>
 
             <div className="flex w-fit items-center gap-3 border-2 border-dashed border-black px-4 py-2">
@@ -78,7 +70,9 @@ export function Item({
                 <Eye className="size-5" />
               </span>
               <p className="flex items-baseline gap-2">
-                <span className="text-sm font-black uppercase">{t('views')}</span>
+                <span className="text-sm font-black uppercase">
+                  {t('views')}
+                </span>
                 <span className="text-2xl font-black leading-none">
                   {views ?? 0}
                 </span>
@@ -105,11 +99,7 @@ export function Item({
           containerClassName="mt-8 border-4 border-black bg-white"
           titleClassName="text-base font-black uppercase sm:text-lg"
         >
-          <EditForm
-            id={alias}
-            destinationUrl={destinationUrl}
-            disabled={disabled}
-          />
+          <EditForm id={alias} disabled={disabled} />
         </Accordion>
       </div>
     </article>

@@ -1,10 +1,10 @@
 import { useTranslations } from '@/i18n/provider'
 import type { FetchStatus } from '@/types/types'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
-import { DestinationUrlField } from './destination-url-field'
 import { Button } from '@/components/ui/button'
 import { Delete } from '@/components/icons/delete'
 import {
@@ -15,14 +15,13 @@ import {
 
 export const EditForm = ({
   id,
-  destinationUrl,
   disabled,
 }: {
   id: string
-  destinationUrl: string
   disabled: boolean
 }) => {
   const t = useTranslations()
+  const router = useRouter()
   const fieldNames = {
     disabled: 'disabled',
     disableViews: 'disableViews',
@@ -59,6 +58,9 @@ export const EditForm = ({
       ...status,
       [name]: response ? 'SUCCESS' : 'FAILED',
     })
+
+    // Refetch the list so the card reflects its new status.
+    if (response) router.refresh()
   }
 
   const handleDelete = async () => {
@@ -71,6 +73,8 @@ export const EditForm = ({
 
     if (response) {
       setStatus({ ...status, delete: 'SUCCESS' })
+      // Refetch the list so the deleted card goes away.
+      router.refresh()
     } else {
       setStatus({ ...status, delete: 'FAILED' })
     }
@@ -83,10 +87,6 @@ export const EditForm = ({
       <div className="hidden justify-between gap-20">
         <Input placeholder={t('backgroundColor')} disabled />
         <Input placeholder={t('squaresColor')} disabled />
-      </div>
-
-      <div className="w-full">
-        <DestinationUrlField id={id} destinationUrl={destinationUrl} />
       </div>
 
       <div className="justify-between items-center gap-20 border-2 border-dashed border-black px-4 py-3">

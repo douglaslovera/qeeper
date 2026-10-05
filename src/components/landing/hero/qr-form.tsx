@@ -1,15 +1,34 @@
 import { useTranslations } from '@/i18n/provider'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { API_BASE_URL } from '@/constants/app'
 /* actions */
 import { createDynamicQR } from '@/data/actions/dynamic-code-actions'
 /* components */
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { Qr } from '@/components/icons/qr'
 import { Link } from '@/components/icons/link'
+import { LoadingDots } from '@/components/shared/loading-dots'
 import { generateQr } from '@/utils/generate-qr'
+
+const DEFAULT_SCHEME = 'https://'
+
+// Splits off a leading http(s):// so it can be shown as a separate prefix.
+const splitScheme = (value: string) => {
+  const match = value.match(/^\s*(https?:\/\/)/i)
+  return match
+    ? { scheme: match[1].toLowerCase(), rest: value.slice(match[0].length) }
+    : { scheme: DEFAULT_SCHEME, rest: value }
+}
+
+const isValidUrl = (value: string) => {
+  try {
+    return Boolean(new URL(value).hostname)
+  } catch {
+    return false
+  }
+}
 
 interface Props {
   setSvg: (svg: string | null) => void
@@ -25,24 +44,55 @@ export function QrGenerationForm({
   setIsDynamic,
 }: Props) {
   const t = useTranslations()
+  const router = useRouter()
   const isDynamicQrDisabled = !isUserLogged
+  // Always the full URL. In dynamic mode the scheme is shown as a gray prefix.
+  const [url, setUrl] = useState('')
+  const { scheme, rest } = splitScheme(url)
+  const [isGenerating, setIsGenerating] = useState(false)
+
+  const handleUrlChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
+    evt.target.setCustomValidity('')
+    if (!isDynamic) return setUrl(evt.target.value)
+
+    // A typed or pasted scheme replaces the prefix instead of duplicating it.
+    // Otherwise the current prefix is kept, falling back to https:// once empty.
+    const { value } = evt.target
+    const typed = splitScheme(value)
+    if (typed.rest !== value) return setUrl(`${typed.scheme}${typed.rest}`)
+    setUrl(value ? `${scheme}${value}` : '')
+  }
 
   const handleSubmit = async (evt: React.FormEvent<HTMLFormElement>) => {
     evt.preventDefault()
-    const form = evt.currentTarget
-    const { value } = form.url
+    if (isGenerating) return
 
-    if (!value) return
-    // TODO: Check the value is a valid URL
+    const input = evt.currentTarget.url as HTMLInputElement
+    const value = isDynamic ? `${scheme}${rest.trim()}` : url
 
-    if (!isDynamic) {
-      const svg = await generateQr(value)
-      setSvg(svg)
-    } else {
-      if (!isUserLogged) return
-      const data = await createDynamicQR(value)
-      if (!data) return
-      setSvg(data)
+    if (!url) return
+
+    if (isDynamic && !isValidUrl(value)) {
+      input.setCustomValidity(t('invalidUrl'))
+      input.reportValidity()
+      return
+    }
+
+    setIsGenerating(true)
+    try {
+      if (!isDynamic) {
+        const svg = await generateQr(value)
+        setSvg(svg)
+      } else {
+        if (!isUserLogged) return
+        const data = await createDynamicQR(value)
+        if (!data) return
+        setSvg(data)
+        // Refetch the list so the new QR shows up.
+        router.refresh()
+      }
+    } finally {
+      setIsGenerating(false)
     }
   }
 
@@ -56,17 +106,25 @@ export function QrGenerationForm({
           <span className="text-sm font-black uppercase sm:text-base">
             {t('destinationUrl')}
           </span>
-          <span className="relative">
-            <Input
+          <span className="flex h-14 items-center border-4 border-border bg-secondary-background text-base font-bold text-foreground ring-offset-white focus-within:ring-2 focus-within:ring-black focus-within:ring-offset-2">
+            <Link className="ml-5 mr-3 size-6 shrink-0" />
+            {isDynamic && <span className="text-black/40">{scheme}</span>}
+            <input
               id="landing-url"
               name="url"
-              placeholder={t('urlPlaceholder')}
+              type="text"
+              inputMode="url"
+              autoComplete="url"
+              value={isDynamic ? rest : url}
+              onChange={handleUrlChange}
+              placeholder={
+                isDynamic
+                  ? splitScheme(t('urlPlaceholder')).rest
+                  : t('urlPlaceholder')
+              }
               required
-              className="h-14 rounded-none border-4 px-5 pl-14 text-base font-bold shadow-none placeholder:text-black/35"
+              className="h-full min-w-0 flex-1 bg-transparent pr-5 placeholder:text-black/35 focus:outline-none"
             />
-            <span className="pointer-events-none absolute left-5 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center text-black">
-              <Link className="size-6" />
-            </span>
           </span>
         </label>
 
@@ -102,10 +160,20 @@ export function QrGenerationForm({
         <Button
           type="submit"
           disabled={!API_BASE_URL}
+          aria-busy={isGenerating}
           className="h-14 w-full rounded-none border-4 text-2xl font-black uppercase shadow-[8px_8px_0_#000]"
         >
           <Qr className="size-8" />
-          <span className="flex flex-1 justify-center px-3">{t('generate')}</span>
+          <span className="flex flex-1 justify-center px-3">
+            {isGenerating ? (
+              <>
+                <LoadingDots className="h-8 items-center [&>span]:size-2" />
+                <span className="sr-only">{t('generate')}</span>
+              </>
+            ) : (
+              t('generate')
+            )}
+          </span>
           <svg
             viewBox="0 0 24 24"
             className="size-8"

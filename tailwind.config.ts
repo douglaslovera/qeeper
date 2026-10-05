@@ -69,10 +69,15 @@ const config: Config = {
         pop: {
           '50%': { transform: 'scale(1.2)' },
         },
+        dot: {
+          '0%, 60%, 100%': { transform: 'translateY(0)', opacity: '0.35' },
+          '30%': { transform: 'translateY(-5px)', opacity: '1' },
+        },
       },
       animation: {
         'fade-in': 'fade-in 0.1s ease-in-out',
         pop: 'pop 0.2s',
+        dot: 'dot 1s ease-in-out infinite',
       },
     },
   },
