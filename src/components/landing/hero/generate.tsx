@@ -43,6 +43,8 @@ export function Generate({
   const { atLeastSm } = useScreen()
 
   const canBeHidden = hideable && !atLeastSm
+  const cardClassName =
+    'relative rounded-none border-4 border-black bg-white p-0 shadow-[16px_16px_0_#000]'
 
   return (
     <div className="relative mx-auto w-full max-w-6xl">
@@ -52,8 +54,17 @@ export function Generate({
         as={canBeHidden ? Accordion : 'section'}
         shadow={false}
         weight="normal"
-        className="relative rounded-none bg-white p-0 shadow-[16px_16px_0_#000]"
-        componentProps={(canBeHidden && { defaultOpen: false, title: t('generateQr') }) || {}}
+        className={cardClassName}
+        componentProps={
+          (canBeHidden && {
+            defaultOpen: false,
+            title: t('generateQr'),
+            // Accordion ignores className, so pass the card styles explicitly
+            containerClassName: cardClassName,
+            titleClassName: 'text-base font-black uppercase sm:text-lg',
+          }) ||
+          {}
+        }
       >
         <div className="px-5 py-6 sm:px-9 sm:py-7 lg:px-12">
           <div className="grid min-h-72 w-full grid-cols-1 items-start gap-7 lg:grid-cols-[1fr_1px_32%] lg:gap-8">

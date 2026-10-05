@@ -32,10 +32,11 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} className={satoshiFont.className}>
-      <body className="text-black">
+      {/* The body stays white: iOS Safari tints its toolbar from the body background. */}
+      <body className="flex min-h-dvh flex-col bg-white text-black">
         <LocaleProvider initialLocale={locale}>
           <Header />
-          {children}
+          <div className="flex flex-1 flex-col bg-background">{children}</div>
         </LocaleProvider>
       </body>
     </html>

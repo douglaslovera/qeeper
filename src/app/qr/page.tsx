@@ -23,7 +23,7 @@ export default async function Page() {
   }
 
   return (
-    <main className="min-w-80 w-full bg-[#b0f0da] px-4 pb-10">
+    <main className="min-w-80 w-full flex-1 bg-[#b0f0da] px-4 pb-10">
       <div className="w-full max-w-4xl mx-auto">
         <h1 className="text-4xl font-semibold text-center py-10">
           <Text id="qrList" />

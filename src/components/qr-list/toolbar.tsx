@@ -27,7 +27,7 @@ export function Toolbar({
   const t = useTranslations()
   return (
     <div className="mt-16 flex flex-col gap-4 sm:flex-row sm:items-stretch">
-      <label className="flex h-14 min-w-0 flex-1 items-center gap-3 border-4 border-black bg-white px-5 shadow-[6px_6px_0_#000] focus-within:bg-main/20">
+      <label className="flex h-14 min-w-0 shrink-0 items-center gap-3 border-4 border-black bg-white px-5 shadow-[6px_6px_0_#000] focus-within:bg-main/20 sm:flex-1">
         <Search className="size-6 shrink-0" />
         <span className="sr-only">{t('searchByUrl')}</span>
         <input
@@ -35,7 +35,7 @@ export function Toolbar({
           value={query}
           onChange={(e) => onQueryChange(e.target.value)}
           placeholder={t('searchByUrl')}
-          className="h-full min-w-0 flex-1 bg-transparent font-bold placeholder:text-black/50 focus:outline-none"
+          className="h-full min-w-0 flex-1 appearance-none rounded-none bg-transparent text-base font-bold placeholder:text-black/50 focus:outline-none"
         />
       </label>
 
