@@ -1,5 +1,6 @@
 import { useTranslations } from '@/i18n/provider'
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib'
 import { downloadPng } from '@/utils/download-image'
 import type React from 'react'
 
@@ -23,7 +24,7 @@ export function DownloadButton({ svg, disabled, size, className, icon }: Props) 
       disabled={!svg || disabled}
       onClick={handleSave}
       size={size || 'default'}
-      className={className}
+      className={cn('disabled:bg-transparent', className)}
     >
       {icon}
       <span className="flex w-full justify-center text-center">{t('download')}</span>
