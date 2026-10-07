@@ -66,11 +66,18 @@ export async function updateUrlWorkerQR(id: string, url: string) {
   }
 }
 
-export async function deleteWorkerQR(id: string) {
+/**
+ * Returns 'missing' when the worker had no link for this key, so callers can
+ * treat it as already removed. `null` means the request failed.
+ */
+export async function deleteWorkerQR(
+  id: string,
+): Promise<'deleted' | 'missing' | null> {
   try {
-    const item = await httpRequest('DELETE', `${PATH}/${id}`)
-    return item
+    await httpRequest('DELETE', `${PATH}/${id}`)
+    return 'deleted'
   } catch (error) {
+    if (error instanceof Response && error.status === 404) return 'missing'
     console.log(error)
     return null
   }

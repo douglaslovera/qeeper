@@ -172,13 +172,18 @@ export async function deleteDynamicQR(key: string) {
 
     const qr = await getOwnedQR(key, user.uid)
 
-    // Disabled QRs have no worker link left to delete.
-    if (!qr.disabled && !(await deleteWorkerQR(key))) {
+    // Disabled QRs have no worker link left to delete. A missing link counts
+    // as removed so a QR whose link is already gone can still be deleted.
+    const removed = qr.disabled ? 'missing' : await deleteWorkerQR(key)
+    if (!removed) {
       throw new Error('Failed to delete QR')
     }
 
     if (!(await deleteQRInDB(key))) {
-      if (!qr.disabled) await createWorkerQR(qr.destinationUrl, { key })
+      // Only restore a link that existed before.
+      if (removed === 'deleted') {
+        await createWorkerQR(qr.destinationUrl, { key })
+      }
       throw new Error('Failed to delete QR')
     }
 
@@ -200,13 +205,17 @@ export async function disableDynamicQR(key: string) {
     const qr = await getOwnedQR(key, user.uid)
 
     // Remove the link first so a failure never frees an active slot while
-    // the link still works.
-    if (!(await deleteWorkerQR(key))) {
+    // the link still works. A missing link counts as removed.
+    const removed = await deleteWorkerQR(key)
+    if (!removed) {
       throw new Error('Failed to disable QR')
     }
 
     if (!(await updateDisableQRInDB(key, true))) {
-      await createWorkerQR(qr.destinationUrl, { key })
+      // Only restore a link that existed before.
+      if (removed === 'deleted') {
+        await createWorkerQR(qr.destinationUrl, { key })
+      }
       throw new Error('Failed to disable QR')
     }
 
