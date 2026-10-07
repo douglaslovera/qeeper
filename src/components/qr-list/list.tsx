@@ -21,9 +21,11 @@ const compare: Record<SortOption, (a: ClientIQRS, b: ClientIQRS) => number> = {
 
 type Props = {
   list: ClientIQRS[] | null
+  // null means unlimited
+  activeLimit: number | null
 }
 
-export function List({ list }: Props) {
+export function List({ list, activeLimit }: Props) {
   const t = useTranslations()
   const [query, setQuery] = useState('')
   const [status, setStatus] = useState<StatusFilter>('all')
@@ -37,6 +39,8 @@ export function List({ list }: Props) {
   })
   if (sort) filtered.sort(compare[sort])
 
+  const activeCount = (list ?? []).filter((item) => !item.disabled).length
+
   return (
     <>
       <Toolbar
@@ -46,6 +50,9 @@ export function List({ list }: Props) {
         onStatusChange={setStatus}
         sort={sort}
         onSortChange={setSort}
+        activeUsage={
+          activeLimit === null ? null : `${activeCount}/${activeLimit}`
+        }
       />
       <section className="mt-10 flex flex-col gap-10 pr-3">
         {filtered.map((item) => (

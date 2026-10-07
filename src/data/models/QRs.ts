@@ -4,6 +4,8 @@ import { firestore } from 'firebase-admin'
 import { _db } from '@/lib/firebase/admin'
 import { QR_COLLECTION, USER_COLLECTION } from '@/constants/collections'
 
+const IN_QUERY_LIMIT = 30
+
 export class QRs implements IQRs {
   alias: string
   destinationUrl: string
@@ -64,13 +66,30 @@ export class QRs implements IQRs {
     const userLinksSnapshot = await QRs.userLinksCollection(userId).get()
     const aliases = userLinksSnapshot.docs.map((doc) => doc.id)
 
-    const linksSnapshot = await QRs.collection()
-      .where(firestore.FieldPath.documentId(), 'in', aliases)
-      .get()
-    /// @ts-ignore
-    return linksSnapshot.docs.map(
-      (doc) => ({ alias: doc.id, ...doc.data() }) as IQRs,
+    // Firestore `in` queries accept at most 30 values, so fetch in chunks.
+    const chunks: string[][] = []
+    for (let i = 0; i < aliases.length; i += IN_QUERY_LIMIT) {
+      chunks.push(aliases.slice(i, i + IN_QUERY_LIMIT))
+    }
+
+    const snapshots = await Promise.all(
+      chunks.map((chunk) =>
+        QRs.collection()
+          .where(firestore.FieldPath.documentId(), 'in', chunk)
+          .get(),
+      ),
     )
+    return snapshots.flatMap((snapshot) =>
+      snapshot.docs.map((doc) => ({ alias: doc.id, ...doc.data() }) as IQRs),
+    )
+  }
+
+  static async countByUser(
+    userId: string,
+  ): Promise<{ enabled: number; total: number }> {
+    const links = await QRs.getLinksByUser(userId)
+    const enabled = links.filter((link) => !link.disabled).length
+    return { enabled, total: links.length }
   }
 
   static async deleteByAlias(alias: string, userId: string): Promise<void> {

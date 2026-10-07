@@ -1,4 +1,5 @@
 import { useTranslations } from '@/i18n/provider'
+import type { MessageKey } from '@/i18n/messages'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { API_BASE_URL } from '@/constants/app'
@@ -21,6 +22,12 @@ const splitScheme = (value: string) => {
     ? { scheme: match[1].toLowerCase(), rest: value.slice(match[0].length) }
     : { scheme: DEFAULT_SCHEME, rest: value }
 }
+
+const CREATE_ERRORS = {
+  enabled_limit: 'createEnabledLimit',
+  total_limit: 'createTotalLimit',
+  failed: 'createFailed',
+} as const satisfies Record<string, MessageKey>
 
 const isValidUrl = (value: string) => {
   try {
@@ -50,6 +57,7 @@ export function QrGenerationForm({
   const [url, setUrl] = useState('')
   const { scheme, rest } = splitScheme(url)
   const [isGenerating, setIsGenerating] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleUrlChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
     evt.target.setCustomValidity('')
@@ -79,15 +87,24 @@ export function QrGenerationForm({
     }
 
     setIsGenerating(true)
+    setError(null)
     try {
       if (!isDynamic) {
         const svg = await generateQr(value)
         setSvg(svg)
       } else {
         if (!isUserLogged) return
-        const data = await createDynamicQR(value)
-        if (!data) return
-        setSvg(data)
+        const result = await createDynamicQR(value)
+        if (!result.ok) {
+          const message = t(CREATE_ERRORS[result.error])
+          setError(
+            'limit' in result
+              ? message.replace('{limit}', String(result.limit))
+              : message,
+          )
+          return
+        }
+        setSvg(result.data)
         // Refetch the list so the new QR shows up.
         router.refresh()
       }
@@ -188,6 +205,14 @@ export function QrGenerationForm({
             <path d="m13 6 6 6-6 6" />
           </svg>
         </Button>
+        {error && (
+          <p
+            role="alert"
+            className="mt-5 border-4 border-black bg-rose-500 px-4 py-2.5 text-xs font-bold text-white sm:text-sm"
+          >
+            {error}
+          </p>
+        )}
       </div>
     </form>
   )

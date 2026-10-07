@@ -76,6 +76,13 @@ const en = {
   editableQrs: 'Your editable QRs',
   scanningAlt: 'Hand holding phone scanning a QR code',
   shareAnyone: 'Share with anyone!',
+  createFailed: 'Unable to create the QR. Please try again.',
+  createEnabledLimit:
+    "You've reached your limit of {limit} active QRs. Disable or delete one to create another.",
+  createTotalLimit:
+    "You've reached the maximum of {limit} QRs for your plan. Delete one to create another.",
+  enableLimit:
+    "You've reached your limit of {limit} active QRs. Disable another QR first.",
 }
 
 export type MessageKey = keyof typeof en
@@ -139,6 +146,13 @@ const es: Record<MessageKey, string> = {
   editableQrs: 'Tus QR editables',
   scanningAlt: 'Una mano sostiene un teléfono que escanea un código QR',
   shareAnyone: '¡Compártelo con quien quieras!',
+  createFailed: 'No se pudo crear el QR. Inténtalo de nuevo.',
+  createEnabledLimit:
+    'Alcanzaste tu límite de {limit} QR activos. Desactiva o elimina uno para crear otro.',
+  createTotalLimit:
+    'Alcanzaste el máximo de {limit} QR de tu plan. Elimina uno para crear otro.',
+  enableLimit:
+    'Alcanzaste tu límite de {limit} QR activos. Desactiva otro QR primero.',
 }
 
 export const messages = { en, es }
