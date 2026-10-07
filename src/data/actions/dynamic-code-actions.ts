@@ -64,7 +64,13 @@ export async function createDynamicQR(
       throw new Error('Failed to create QR')
     }
 
-    await addQR(workerQR.key, { url, uid: user.uid })
+    const saved = await addQR(workerQR.key, { url, uid: user.uid })
+
+    if (!saved) {
+      // Remove the link so it can't work without counting toward the limit.
+      await deleteWorkerQR(workerQR.key)
+      throw new Error('Failed to save QR')
+    }
 
     const svg = await generateQr(workerQR.url)
 
@@ -103,13 +109,16 @@ export async function updateUrlDynamicQR(key: string, url: string) {
       throw new Error('Unauthorized')
     }
 
-    await getOwnedQR(key, user.uid)
+    const qr = await getOwnedQR(key, user.uid)
 
-    // Be careful with a mismatch between both DBs services
-    const workerResponse = await updateUrlWorkerQR(key, url)
-    const dbResponse = await updateQRUrlInDB(key, url)
+    // Disabled QRs have no worker link, so only Firestore is updated.
+    if (!qr.disabled && !(await updateUrlWorkerQR(key, url))) {
+      throw new Error('Failed to update QR')
+    }
 
-    if (!workerResponse || !dbResponse) {
+    if (!(await updateQRUrlInDB(key, url))) {
+      // Restore the old URL so both services stay in sync.
+      if (!qr.disabled) await updateUrlWorkerQR(key, qr.destinationUrl)
       throw new Error('Failed to update QR')
     }
 
@@ -161,12 +170,15 @@ export async function deleteDynamicQR(key: string) {
       throw new Error('Unauthorized')
     }
 
-    await getOwnedQR(key, user.uid)
+    const qr = await getOwnedQR(key, user.uid)
 
-    const workerResponse = await deleteWorkerQR(key)
-    const dbResponse = await deleteQRInDB(key)
+    // Disabled QRs have no worker link left to delete.
+    if (!qr.disabled && !(await deleteWorkerQR(key))) {
+      throw new Error('Failed to delete QR')
+    }
 
-    if (!workerResponse || !dbResponse) {
+    if (!(await deleteQRInDB(key))) {
+      if (!qr.disabled) await createWorkerQR(qr.destinationUrl, { key })
       throw new Error('Failed to delete QR')
     }
 
@@ -185,12 +197,16 @@ export async function disableDynamicQR(key: string) {
       throw new Error('Unauthorized')
     }
 
-    await getOwnedQR(key, user.uid)
+    const qr = await getOwnedQR(key, user.uid)
 
-    const dbResponse = await updateDisableQRInDB(key, true)
-    const workerResponse = await deleteWorkerQR(key)
+    // Remove the link first so a failure never frees an active slot while
+    // the link still works.
+    if (!(await deleteWorkerQR(key))) {
+      throw new Error('Failed to disable QR')
+    }
 
-    if (!workerResponse || !dbResponse) {
+    if (!(await updateDisableQRInDB(key, true))) {
+      await createWorkerQR(qr.destinationUrl, { key })
       throw new Error('Failed to disable QR')
     }
 
@@ -211,13 +227,19 @@ export async function enableDynamicQR(key: string): Promise<QuotaResult<null>> {
 
     const qr = await getOwnedQR(key, user.uid)
 
-    const quota = await checkCanEnableQR(user.uid)
-    if (!quota.ok) return quota
+    // An already enabled QR holds its slot; just make sure the link exists.
+    if (qr.disabled) {
+      const quota = await checkCanEnableQR(user.uid)
+      if (!quota.ok) return quota
+    }
 
-    const dbResponse = await updateDisableQRInDB(key, false)
-    const workerResponse = await createWorkerQR(qr.destinationUrl, { key })
+    // Create the link first so a failure never takes up an active slot.
+    if (!(await createWorkerQR(qr.destinationUrl, { key }))) {
+      throw new Error('Failed to enable QR')
+    }
 
-    if (!workerResponse || !dbResponse) {
+    if (!(await updateDisableQRInDB(key, false))) {
+      if (qr.disabled) await deleteWorkerQR(key)
       throw new Error('Failed to enable QR')
     }
 

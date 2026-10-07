@@ -12,6 +12,8 @@ export const errorPayload = (
   c: QeeperCtx,
   error: Record<string, any>,
 ) => {
-  if (error.statusCode === 500) console.error(error);
-  return c.json({ type: error.name, success: false, message: error.message }, error.statusCode);
+  // Errors without a status (e.g. a failed KV write) are server errors.
+  const statusCode = error.statusCode ?? 500;
+  if (statusCode === 500) console.error(error);
+  return c.json({ type: error.name, success: false, message: error.message }, statusCode);
 }
