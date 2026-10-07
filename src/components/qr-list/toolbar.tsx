@@ -14,6 +14,8 @@ type Props = {
   onStatusChange: (status: StatusFilter) => void
   sort: SortOption | null
   onSortChange: (sort: SortOption | null) => void
+  // e.g. "3/5", shown on the Active filter; null for unlimited plans
+  activeUsage: string | null
 }
 
 export function Toolbar({
@@ -23,6 +25,7 @@ export function Toolbar({
   onStatusChange,
   sort,
   onSortChange,
+  activeUsage,
 }: Props) {
   const t = useTranslations()
   return (
@@ -60,6 +63,7 @@ export function Toolbar({
             )}
           >
             {t(filter)}
+            {filter === 'active' && activeUsage && ` ${activeUsage}`}
           </button>
         ))}
       </fieldset>

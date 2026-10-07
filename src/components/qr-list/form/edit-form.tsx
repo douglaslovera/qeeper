@@ -51,7 +51,11 @@ export const EditForm = ({
 
     // enable QR
     if (!value) {
-      response = await enableDynamicQR(id)
+      const result = await enableDynamicQR(id)
+      response = result.ok
+      if (!result.ok && 'limit' in result) {
+        alert(t('enableLimit').replace('{limit}', String(result.limit)))
+      }
     }
 
     setStatus({

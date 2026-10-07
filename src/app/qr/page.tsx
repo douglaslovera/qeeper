@@ -4,7 +4,10 @@ import { Text } from '@/i18n/provider'
 
 import { redirect } from 'next/navigation'
 import { getUserMe } from '@/data/services/get-user-me-service'
-import { listDynamicQRs } from '@/data/actions/dynamic-code-actions'
+import {
+  getActiveQrLimit,
+  listDynamicQRs,
+} from '@/data/actions/dynamic-code-actions'
 import { Generate } from '@/components/landing/hero/generate'
 import { List } from '@/components/qr-list/list'
 import { Header } from '@/components/landing/header'
@@ -16,7 +19,10 @@ export default async function Page() {
     return redirect('/')
   }
 
-  const list = await listDynamicQRs()
+  const [list, activeLimit] = await Promise.all([
+    listDynamicQRs(),
+    getActiveQrLimit(),
+  ])
 
   if (!list) {
     return <div><Text id="listError" /></div>
@@ -29,7 +35,7 @@ export default async function Page() {
           <Text id="qrList" />
         </h1>
         <Generate isUserLogged={!!user?.uid} defaultDynamicSwitch hideable />
-        <List list={list} />
+        <List list={list} activeLimit={activeLimit} />
       </div>
     </main>
   )
